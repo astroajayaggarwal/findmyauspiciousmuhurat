@@ -391,7 +391,7 @@
 
             try {
                 // IMPORTANT: Replace with your actual backend URL
-                const baseUrl = `http://127.0.0.1:5000`;
+                const baseUrl = `https://fullbackendapi.vercel.app`;
                 const params = `start_date=${startDate}&end_date=${endDate}&location=${encodeURIComponent(location)}`;
 
                 const promises = [];
@@ -465,7 +465,7 @@
             suggestionsLoader.style.display = 'block';
             debounceTimer = setTimeout(async () => {
                 try {
-                    const baseUrl = `http://127.0.0.1:5000`;
+                    const baseUrl = `https://fullbackendapi.vercel.app`;
                     const response = await fetch(`${baseUrl}/suggest_locations?query=${encodeURIComponent(query)}`);
                     const data = await response.json();
                     if (data.suggestions && data.suggestions.length > 0) {
