@@ -162,6 +162,8 @@
             background: none; border: none; font-size: 1.5rem;
             cursor: pointer; color: #6b7280;
         }
+        .text-green-700 { color: #15803d; }
+        .text-red-700 { color: #b91c1c; }
     </style>
 </head>
 <body class="flex items-center justify-center">
@@ -245,7 +247,19 @@
         const nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"];
         const rashis = ["Mesh (Aries)", "Vrishabh (Taurus)", "Mithun (Gemini)", "Kark (Cancer)", "Singh (Leo)", "Kanya (Virgo)", "Tula (Libra)", "Vrishchik (Scorpio)", "Dhanu (Sagittarius)", "Makar (Capricorn)", "Kumbh (Aquarius)", "Meen (Pisces)"];
         const rashiMapping = { "Mesha": "Mesh (Aries)", "Mesh": "Mesh (Aries)", "Vrishabha": "Vrishabh (Taurus)", "Vrishabh": "Vrishabh (Taurus)", "Mithuna": "Mithun (Gemini)", "Mithun": "Mithun (Gemini)", "Karka": "Kark (Cancer)", "Kark": "Kark (Cancer)", "Simha": "Singh (Leo)", "Singh": "Singh (Leo)", "Kanya": "Kanya (Virgo)", "Tula": "Tula (Libra)", "Vrishchika": "Vrishchik (Scorpio)", "Vrishchik": "Vrishchik (Scorpio)", "Dhanu": "Dhanu (Sagittarius)", "Dhanus": "Dhanu (Sagittarius)", "Makar": "Makar (Capricorn)", "Makara": "Makar (Capricorn)", "Kumbha": "Kumbh (Aquarius)", "Kumbh": "Kumbh (Aquarius)", "Meena": "Meen (Pisces)", "Meen": "Meen (Pisces)" };
-        const taraBalaDescriptions = { 1: { type: 'Janma (Birth Star)', significance: 'Good for important work', verdict: 'Good' }, 2: { type: 'Sampat (Wealth)', significance: 'Good for financial matters', verdict: 'Very Good' }, 3: { type: 'Vipat (Danger)', significance: 'Avoid risks and travel', verdict: 'Bad' }, 4: { type: 'Kshema (Well-being)', significance: 'Good for health activities', verdict: 'Good' }, 5: { type: 'Pratyak (Obstacles)', significance: 'Avoid new ventures', verdict: 'Bad' }, 6: { type: 'Sadhana (Achievement)', significance: 'Good for spiritual pursuits', verdict: 'Very Good' }, 7: { type: 'Naidhana (Death)', significance: 'Avoid all important activities', verdict: 'Bad' }, 8: { type: 'Mitra (Friend)', significance: 'Favorable for most activities', verdict: 'Good' }, 9: { type: 'Param Mitra (Best Friend)', significance: 'Excellent for all activities', verdict: 'Excellent' } };
+        
+        const taraBalaDescriptions = {
+            1: { type: 'Janma (Very Good)', significance: 'Good time to start any important work' },
+            2: { type: 'Sampat (Wealth)', significance: 'Good time to start something related to Money' },
+            3: { type: 'Vipat (Danger)', significance: 'No travel. No Risk' },
+            4: { type: 'Kshema (Well Being)', significance: 'Good Time To Start Health Related activities' },
+            5: { type: 'Pratyaari (Obstacle)', significance: 'Avoid anything New. Avoid Taking Risks' },
+            6: { type: 'Sadhana (Achievement)', significance: 'Good Time To Start Meditation, Sadhana, Spiritual activities' },
+            7: { type: 'Naidhana (Death)', significance: 'Don\'t start any new work. Don\'t Take Risk' },
+            8: { type: 'Mitra (Friend)', significance: 'Good To start new things' },
+            9: { type: 'Param Mitra (Very Good)', significance: 'Good To start new things, highly favorable' }
+        };
+
         const goodTaraBalaGroups = [1, 2, 4, 6, 8, 9];
         const badRashiCounts = [4, 8, 12];
         const tithiScores = { "Pratipada": 1, "Dwitiya": 1, "Tritiya": 1, "Chaturthi": 0, "Panchami": 1, "Shashthi": 0, "Saptami": 1, "Ashtami": 0, "Navami": 0, "Dashami": 1, "Ekadashi": 1, "Dwadashi": 0, "Trayodashi": 1, "Chaturdashi": 0, "Purnima": 1, "Amavasya": 0 };
@@ -664,9 +678,30 @@
 
         function calculateFinalVerdict(panchangScore, isOverallGood) {
             let verdictText = (panchangScore >= 24 && isOverallGood) || panchangScore >= 60 ? 'Auspicious' : 'Not Recommended';
-            let verdictClass = verdictText === 'Auspicious' ? 'text-green-600' : 'text-red-600';
+            let verdictClass = verdictText === 'Auspicious' ? 'text-green-700' : 'text-red-700';
             return { text: verdictText, class: verdictClass };
         }
+
+        // MODIFIED function to include Tara Bala significance
+        function generateChandraTaraBalHtml(results) {
+            // Verdict
+            const verdictText = results.isOverallGood ? 'Auspicious' : 'Inauspicious';
+            const verdictClass = results.isOverallGood ? 'text-green-700' : 'text-red-700';
+            const verdictHtml = `<div class="font-bold ${verdictClass} mb-1">${verdictText}</div>`;
+
+            // Tara Bala Details
+            const taraInfo = taraBalaDescriptions[results.taraBalaGroup];
+            const taraClass = results.isNakshatraGood ? 'text-green-700' : 'text-red-700';
+            const taraHtml = `<div class="text-xs ${taraClass}"><strong class="text-gray-800">Tara Bala:</strong> ${taraInfo.type} - <span class="text-gray-600 italic">${taraInfo.significance}</span></div>`;
+
+            // Chandra Bala Details
+            const chandraClass = results.isRashiGood ? 'text-green-700' : 'text-red-700';
+            const chandraStatusText = results.isRashiGood ? 'Good' : `Bad (${results.rashiCount}th Moon)`;
+            const chandraHtml = `<div class="text-xs ${chandraClass} mt-1"><strong class="text-gray-800">Chandra Bala:</strong> ${chandraStatusText}</div>`;
+            
+            return verdictHtml + taraHtml + chandraHtml;
+        }
+
 
         function renderPanchangTable(panchangList, birthNakshatra, birthMoonSign, showPanchang, showCT, showChoghadiya) {
             if (!panchangList || panchangList.length === 0) {
@@ -679,11 +714,11 @@
 
             const headers = ['<th style="width: 10%;">Date</th>'];
             if (showPanchang && showCT) {
-                headers.push('<th style="width: 15%;">Nakshatra</th>', '<th style="width: 15%;">Moonsign</th>', '<th style="width: 15%;">Panchang Score</th>', '<th style="width: 25%;">CT Verdict</th>', '<th style="width: 15%;">Final Verdict</th>');
+                headers.push('<th style="width: 15%;">Nakshatra</th>', '<th style="width: 15%;">Moonsign</th>', '<th style="width: 15%;">Panchang Score</th>', '<th style="width: 25%;">CT Verdict & Details</th>', '<th style="width: 15%;">Final Verdict</th>');
             } else if (showPanchang) {
                 headers.push('<th style="width: 18%;">Nakshatra</th>', '<th style="width: 18%;">Tithi</th>', '<th style="width: 18%;">Yoga</th>', '<th style="width: 18%;">Karana</th>', '<th style="width: 13%;">Panchang Score</th>');
             } else { // CT Only
-                headers.push('<th style="width: 25%;">Nakshatra</th>', '<th style="width: 25%;">Moonsign</th>', '<th style="width: 45%;">Chandrabal & Tarabal Verdict</th>');
+                headers.push('<th style="width: 25%;">Nakshatra</th>', '<th style="width: 25%;">Moonsign</th>', '<th style="width: 45%;">CT Verdict & Details</th>');
             }
             headers.push('<th style="width: 5%;"></th>');
             const tableHeaders = headers.join('');
@@ -763,25 +798,21 @@
                 const dateDisplay = `<span class="${item.paksha === 'Shukla Paksha' ? 'text-orange-600 font-bold' : ''}">${item.date}</span><br><span class="font-normal text-gray-600">${item.weekday}</span>`;
                 let panchangScoreContent = p2_results ? `<div><div class="font-bold text-lg ${p1_results.scoreCategoryClass}">${p1_results.panchangScore}</div><div class="text-xs text-gray-500">until ${transitTime}</div></div><hr class="my-1 border-gray-300"><div><div class="font-bold text-lg ${p2_results.scoreCategoryClass}">${p2_results.panchangScore}</div><div class="text-xs text-gray-500">after ${transitTime}</div></div>` : `<div><div class="font-bold text-lg ${p1_results.scoreCategoryClass}">${p1_results.panchangScore}</div><div class="text-xs ${p1_results.scoreCategoryClass}" style="white-space: normal;">${p1_results.scoreCategory}</div></div>`;
                 
-                const generateVerdictHtml = (results, timePrefix) => {
-                    const taraInfo = taraBalaDescriptions[results.taraBalaGroup];
-                    const verdictClass = results.isOverallGood ? 'text-green-600' : 'text-red-600';
-                    const verdictText = results.isOverallGood ? 'Auspicious' : 'Inauspicious';
-                    let reason = !results.isOverallGood ? `(${!results.isNakshatraGood ? taraInfo.type : ''}${!results.isNakshatraGood && !results.isRashiGood ? ', ' : ''}${!results.isRashiGood ? `${results.rashiCount}th Moon` : ''})` : `(${taraInfo.type})`;
-                    return `<div class="font-bold ${verdictClass}">${timePrefix} ${verdictText} <span class="font-normal text-gray-600">${reason}</span></div>`;
-                };
-                let finalResultContent = p2_results ? generateVerdictHtml(p1_results, `Until ${transitTime}:`) + generateVerdictHtml(p2_results, `After ${transitTime}:`) : generateVerdictHtml(p1_results, 'All Day:');
+                let chandraTaraBalContent = p2_results 
+                    ? `<div>${generateChandraTaraBalHtml(p1_results)}<div class="text-xs text-gray-500 pt-1">Until ${transitTime}</div></div><hr class="my-1 border-gray-300"><div>${generateChandraTaraBalHtml(p2_results)}<div class="text-xs text-gray-500 pt-1">After ${transitTime}</div></div>` 
+                    : generateChandraTaraBalHtml(p1_results);
+
                 
                 let mainRowCells = [`<td>${dateDisplay}</td>`];
                 if (showPanchang && showCT) {
                     const p1_finalVerdict = calculateFinalVerdict(p1_results.panchangScore, p1_results.isOverallGood);
                     const p2_finalVerdict = p2_results ? calculateFinalVerdict(p2_results.panchangScore, p2_results.isOverallGood) : null;
                     let finalVerdictContentHtml = p2_finalVerdict ? `<div><span class="font-bold ${p1_finalVerdict.class}">${p1_finalVerdict.text}</span><div class="text-xs text-gray-500">until ${transitTime}</div></div><hr class="my-1 border-gray-300"><div><span class="font-bold ${p2_finalVerdict.class}">${p2_finalVerdict.text}</span><div class="text-xs text-gray-500">after ${transitTime}</div></div>` : `<div><span class="font-bold ${p1_finalVerdict.class}">${p1_finalVerdict.text}</span></div>`;
-                    mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${moonsignHtml}</td>`, `<td class="text-center">${panchangScoreContent}</td>`, `<td>${finalResultContent}</td>`, `<td class="text-center">${finalVerdictContentHtml}</td>`);
+                    mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${moonsignHtml}</td>`, `<td class="text-center">${panchangScoreContent}</td>`, `<td>${chandraTaraBalContent}</td>`, `<td class="text-center">${finalVerdictContentHtml}</td>`);
                 } else if (showPanchang) {
                     mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${(item.tithi || '').split(' upto ')[0]}</td>`, `<td>${(item.yoga || '').split(' upto ')[0]}</td>`, `<td>${(item.karana || '').split(' upto ')[0]}</td>`, `<td class="text-center">${panchangScoreContent}</td>`);
                 } else { // CT Only
-                    mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${moonsignHtml}</td>`, `<td>${finalResultContent}</td>`);
+                    mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${moonsignHtml}</td>`, `<td>${chandraTaraBalContent}</td>`);
                 }
                 mainRowCells.push(`<td class="text-center"><button class="expand-btn text-gray-600 hover:text-gray-900 focus:outline-none" data-date="${item.date}"><span class="expand-arrow">&#9658;</span></button></td>`);
 
@@ -798,7 +829,7 @@
                     if (showCT) {
                         rows.push(`<tr><td>Nakshatra</td><td>${p1_results.nakshatraName} ${showPanchang ? scoreSup(p1_results.nakshatraScore) : ''}</td>${isSplit ? `<td>${p2_results.nakshatraName} ${showPanchang ? scoreSup(p2_results.nakshatraScore) : ''}</td>` : ''}</tr>`);
                         rows.push(`<tr><td>Moonsign</td><td>${p1_results.moonSignName}</td>${isSplit ? `<td>${p2_results.moonSignName}</td>` : ''}</tr>`);
-                        rows.push(`<tr><td class="font-semibold">CT Verdict</td><td class="${p1_results.isOverallGood ? 'text-green-600' : 'text-red-600'} font-semibold">${p1_results.isOverallGood ? 'Auspicious' : 'Inauspicious'}</td>${isSplit ? `<td class="${p2_results.isOverallGood ? 'text-green-600' : 'text-red-600'} font-semibold">${p2_results.isOverallGood ? 'Auspicious' : 'Inauspicious'}</td>` : ''}</tr>`);
+                        rows.push(`<tr><td class="font-semibold">CT Verdict & Details</td><td>${generateChandraTaraBalHtml(p1_results)}</td>${isSplit ? `<td>${generateChandraTaraBalHtml(p2_results)}</td>` : ''}</tr>`);
                     }
                     const header = isSplit ? `<tr><th>Analysis</th><th>Period 1 (until ${transitTime})</th><th>Period 2 (after ${transitTime})</th></tr>` : `<thead><tr><th>Analysis</th><th>Full Day</th></tr></thead>`;
                     return `<table class="detail-table mt-4"><thead>${header}</thead><tbody>${rows.join('')}</tbody></table>`;
