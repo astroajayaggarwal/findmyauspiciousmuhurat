@@ -126,6 +126,7 @@
         }
         .choghadiya-table th { background-color: #f1f5f9; font-weight: 600; color: #334155; }
         .muhurta-good { background-color: #f0fdf4; color: #15803d; }
+        .muhurta-neutral { background-color: #eff6ff; color: #1d4ed8; }
         .choghadiya-title {
             font-size: 1.25rem; font-weight: bold; color: #374151;
             padding-bottom: 0.5rem; border-bottom: 2px solid #dc2626;
@@ -144,6 +145,12 @@
         .muhurta-in-rahu td:first-child {
             font-weight: bold;
         }
+        .btn-choghadiya-view {
+            background-color: #16a34a; color: white; font-weight: 600;
+            padding: 0.5rem 1rem; border-radius: 0.5rem; border: 1px solid #15803d;
+            transition: all 0.2s ease;
+        }
+        .btn-choghadiya-view:hover { background-color: #14532d; }
         
         /* Modal Styles */
         .modal-overlay {
@@ -244,7 +251,8 @@
 
     <script>
         // --- DATA AND CONSTANTS ---
-        const nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"];
+        // FIX: Standardized Nakshatra names for consistency
+        const nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishtha", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"];
         const rashis = ["Mesh (Aries)", "Vrishabh (Taurus)", "Mithun (Gemini)", "Kark (Cancer)", "Singh (Leo)", "Kanya (Virgo)", "Tula (Libra)", "Vrishchik (Scorpio)", "Dhanu (Sagittarius)", "Makar (Capricorn)", "Kumbh (Aquarius)", "Meen (Pisces)"];
         const rashiMapping = { "Mesha": "Mesh (Aries)", "Mesh": "Mesh (Aries)", "Vrishabha": "Vrishabh (Taurus)", "Vrishabh": "Vrishabh (Taurus)", "Mithuna": "Mithun (Gemini)", "Mithun": "Mithun (Gemini)", "Karka": "Kark (Cancer)", "Kark": "Kark (Cancer)", "Simha": "Singh (Leo)", "Singh": "Singh (Leo)", "Kanya": "Kanya (Virgo)", "Tula": "Tula (Libra)", "Vrishchika": "Vrishchik (Scorpio)", "Vrishchik": "Vrishchik (Scorpio)", "Dhanu": "Dhanu (Sagittarius)", "Dhanus": "Dhanu (Sagittarius)", "Makar": "Makar (Capricorn)", "Makara": "Makar (Capricorn)", "Kumbha": "Kumbh (Aquarius)", "Kumbh": "Kumbh (Aquarius)", "Meena": "Meen (Pisces)", "Meen": "Meen (Pisces)" };
         
@@ -263,11 +271,11 @@
         const goodTaraBalaGroups = [1, 2, 4, 6, 8, 9];
         const badRashiCounts = [4, 8, 12];
         const tithiScores = { "Pratipada": 1, "Dwitiya": 1, "Tritiya": 1, "Chaturthi": 0, "Panchami": 1, "Shashthi": 0, "Saptami": 1, "Ashtami": 0, "Navami": 0, "Dashami": 1, "Ekadashi": 1, "Dwadashi": 0, "Trayodashi": 1, "Chaturdashi": 0, "Purnima": 1, "Amavasya": 0 };
-        const nakshatraScores = { "Ashwini": 4, "Bharani": 0, "Krittika": 0, "Rohini": 4, "Mrigashirsha": 4, "Ardra": 0, "Punarvasu": 4, "Pushya": 4, "Ashlesha": 0, "Magha": 0, "Purva Phalguni": 0, "Uttara Phalguni": 4, "Hasta": 4, "Chitra": 4, "Swati": 4, "Vishakha": 0, "Anuradha": 4, "Jyeshtha": 0, "Mula": 4, "Purva Ashadha": 0, "Uttara Ashadha": 4, "Shravana": 4, "Dhanishta": 4, "Shatabhisha": 4, "Purva Bhadrapada": 4, "Uttara Bhadrapada": 4, "Revati": 4 };
+        const nakshatraScores = { "Ashwini": 4, "Bharani": 0, "Krittika": 0, "Rohini": 4, "Mrigashirsha": 4, "Ardra": 0, "Punarvasu": 4, "Pushya": 4, "Ashlesha": 0, "Magha": 0, "Purva Phalguni": 0, "Uttara Phalguni": 4, "Hasta": 4, "Chitra": 4, "Swati": 4, "Vishakha": 0, "Anuradha": 4, "Jyeshtha": 0, "Mula": 4, "Purva Ashadha": 0, "Uttara Ashadha": 4, "Shravana": 4, "Dhanishtha": 4, "Shatabhisha": 4, "Purva Bhadrapada": 4, "Uttara Bhadrapada": 4, "Revati": 4 };
         const dayScores = { "Sunday": 8, "Monday": 8, "Tuesday": 0, "Wednesday": 8, "Thursday": 8, "Friday": 8, "Saturday": 0 };
         const karanaScores = { "Bava": 16, "Balava": 16, "Kaulava": 0, "Taitila": 16, "Garaja": 16, "Vanija": 16, "Vishti": 0, "Shakuni": 0, "Chatushpada": 0, "Naga": 0, "Kinstughna": 0 };
         const yogaScores = { "Vaidhriti": 0, "Vishkambha": 0, "Priti": 32, "Ayushmana": 32, "Saubhagya": 32, "Shobhana": 32, "Atiganda": 0, "Sukarma": 32, "Dhriti": 32, "Shula": 0, "Ganda": 0, "Vriddhi": 32, "Dhruva": 32, "Vyaghata": 0, "Harshana": 32, "Vajra": 0, "Siddhi": 32, "Vyatipata": 0, "Variyana": 32, "Parigha": 0, "Shiva": 32, "Siddha": 32, "Sadhya": 32, "Shubha": 32, "Shukla": 32, "Brahma": 32, "Indra": 32 };
-        const goodMuhurtaNames = ["Shubha", "Labha", "Amrita", "Shubh", "Labh", "Amrit"];
+        const displayMuhurtaNames = ["Shubha", "Labha", "Amrita", "Shubh", "Labh", "Amrit", "Chal"];
 
         // --- UI ELEMENT REFERENCES ---
         const panchangForm = document.getElementById('panchangForm');
@@ -489,7 +497,6 @@
             }
         }
         
-        // --- NEW UTILITY ---
         function timeToMinutes(timeStr) {
             if (!timeStr) return Infinity;
             const upperTimeStr = timeStr.toUpperCase();
@@ -503,7 +510,7 @@
         }
         
         function highlightRahuKalamOverlap(choghadiyaData, rahuKalamStr) {
-            if (!rahuKalamStr || !rahuKalamStr.includes('to')) return choghadiyaData;
+            if (!rahuKalamStr || !rahuKalamStr.includes(' to ')) return choghadiyaData;
 
             const [rahuStartStr, rahuEndStr] = rahuKalamStr.split(' to ');
             const rahuStartMins = timeToMinutes(rahuStartStr);
@@ -533,11 +540,17 @@
 
 
         function getFilteredChoghadiyaHtml(choghadiyaData) {
+            const getMuhurtaClass = (muhurta) => {
+                if (muhurta.name.includes('Chal')) return 'muhurta-neutral';
+                if (displayMuhurtaNames.some(n => muhurta.name.includes(n))) return 'muhurta-good';
+                return '';
+            };
+
             const filterMuhurtas = (muhurtas) => {
                 if (!muhurtas) return '<tr><td colspan="2">None</td></tr>';
-                const filtered = muhurtas.filter(m => goodMuhurtaNames.some(name => m.name.includes(name)));
+                const filtered = muhurtas.filter(m => displayMuhurtaNames.some(name => m.name.includes(name)));
                 if (filtered.length === 0) return '<tr><td colspan="2">None</td></tr>';
-                return filtered.map(m => `<tr class="muhurta-good ${m.inRahuKalam ? 'muhurta-in-rahu' : ''}"><td class="font-semibold">${m.name}</td><td>${m.time}</td></tr>`).join('');
+                return filtered.map(m => `<tr class="${getMuhurtaClass(m)} ${m.inRahuKalam ? 'muhurta-in-rahu' : ''}"><td class="font-semibold">${m.name}</td><td>${m.time}</td></tr>`).join('');
             }
             
             const dayRows = filterMuhurtas(choghadiyaData.day);
@@ -548,14 +561,14 @@
                     <div>
                         <h3 class="text-xl font-semibold text-center mb-2 text-gray-700">Day Choghadiya</h3>
                         <table class="choghadiya-table rounded-lg overflow-hidden shadow">
-                            <thead><tr><th>Auspicious Muhurta</th><th>Timings</th></tr></thead>
+                            <thead><tr><th>Favorable Muhurta</th><th>Timings</th></tr></thead>
                             <tbody>${dayRows}</tbody>
                         </table>
                     </div>
                     <div>
                         <h3 class="text-xl font-semibold text-center mb-2 text-gray-700">Night Choghadiya</h3>
                         <table class="choghadiya-table rounded-lg overflow-hidden shadow">
-                            <thead><tr><th>Auspicious Muhurta</th><th>Timings</th></tr></thead>
+                            <thead><tr><th>Favorable Muhurta</th><th>Timings</th></tr></thead>
                             <tbody>${nightRows}</tbody>
                         </table>
                     </div>
@@ -623,42 +636,60 @@
             return `${name}${score !== undefined ? `<sup class="${scoreClass}">${score}</sup>` : ''}${timeInfo}`;
         }
         
-        function parseTimeToHour(timeStr) {
-            if (!timeStr) return 99;
-            const upperTimeStr = timeStr.toUpperCase();
-            const modifier = upperTimeStr.includes('PM') ? 'PM' : upperTimeStr.includes('AM') ? 'AM' : '';
-            const timePart = upperTimeStr.replace('AM', '').replace('PM', '').trim();
-            let [hours, minutes] = timePart.split(':').map(Number);
-            if (isNaN(hours)) return 99;
-            if (modifier === 'PM' && hours < 12) hours += 12;
-            if (modifier === 'AM' && hours === 12) hours = 0;
-            return hours;
-        }
+        // --- FIX: TARA BALA DATA FROM PDF ---
+        // This data is manually transcribed from the provided PDF.
+        const taraBalaData = {
+            "Ashwini": {"Ashwini":1,"Magha":1,"Mula":1,"Bharani":2,"Purva Phalguni":2,"Purva Ashadha":2,"Krittika":3,"Uttara Phalguni":3,"Uttara Ashadha":3,"Rohini":4,"Hasta":4,"Shravana":4,"Mrigashirsha":5,"Chitra":5,"Dhanishtha":5,"Ardra":6,"Swati":6,"Shatabhisha":6,"Punarvasu":7,"Vishakha":7,"Purva Bhadrapada":7,"Pushya":8,"Anuradha":8,"Uttara Bhadrapada":8,"Ashlesha":9,"Jyeshtha":9,"Revati":9},
+            "Bharani": {"Bharani":1,"Purva Phalguni":1,"Purva Ashadha":1,"Krittika":2,"Uttara Phalguni":2,"Uttara Ashadha":2,"Rohini":3,"Hasta":3,"Shravana":3,"Mrigashirsha":4,"Chitra":4,"Dhanishtha":4,"Ardra":5,"Swati":5,"Shatabhisha":5,"Punarvasu":6,"Vishakha":6,"Purva Bhadrapada":6,"Pushya":7,"Anuradha":7,"Uttara Bhadrapada":7,"Ashlesha":8,"Jyeshtha":8,"Revati":8,"Ashwini":9,"Magha":9,"Mula":9},
+            "Krittika": {"Krittika":1,"Uttara Phalguni":1,"Uttara Ashadha":1,"Rohini":2,"Hasta":2,"Shravana":2,"Mrigashirsha":3,"Chitra":3,"Dhanishtha":3,"Ardra":4,"Swati":4,"Shatabhisha":4,"Punarvasu":5,"Vishakha":5,"Purva Bhadrapada":5,"Pushya":6,"Anuradha":6,"Uttara Bhadrapada":6,"Ashlesha":7,"Jyeshtha":7,"Revati":7,"Ashwini":8,"Magha":8,"Mula":8,"Bharani":9,"Purva Phalguni":9,"Purva Ashadha":9},
+            "Rohini": {"Rohini":1,"Hasta":1,"Shravana":1,"Mrigashirsha":2,"Chitra":2,"Dhanishtha":2,"Ardra":3,"Swati":3,"Shatabhisha":3,"Punarvasu":4,"Vishakha":4,"Purva Bhadrapada":4,"Pushya":5,"Anuradha":5,"Uttara Bhadrapada":5,"Ashlesha":6,"Jyeshtha":6,"Revati":6,"Ashwini":7,"Magha":7,"Mula":7,"Bharani":8,"Purva Phalguni":8,"Purva Ashadha":8,"Krittika":9,"Uttara Phalguni":9,"Uttara Ashadha":9},
+            "Mrigashirsha": {"Mrigashirsha":1,"Chitra":1,"Dhanishtha":1,"Ardra":2,"Swati":2,"Shatabhisha":2,"Punarvasu":3,"Vishakha":3,"Purva Bhadrapada":3,"Pushya":4,"Anuradha":4,"Uttara Bhadrapada":4,"Ashlesha":5,"Jyeshtha":5,"Revati":5,"Ashwini":6,"Magha":6,"Mula":6,"Bharani":7,"Purva Phalguni":7,"Purva Ashadha":7,"Krittika":8,"Uttara Phalguni":8,"Uttara Ashadha":8,"Rohini":9,"Hasta":9,"Shravana":9},
+            "Ardra": {"Ardra":1,"Swati":1,"Shatabhisha":1,"Punarvasu":2,"Vishakha":2,"Purva Bhadrapada":2,"Pushya":3,"Anuradha":3,"Uttara Bhadrapada":3,"Ashlesha":4,"Jyeshtha":4,"Revati":4,"Ashwini":5,"Magha":5,"Mula":5,"Bharani":6,"Purva Phalguni":6,"Purva Ashadha":6,"Krittika":7,"Uttara Phalguni":7,"Uttara Ashadha":7,"Rohini":8,"Hasta":8,"Shravana":8,"Mrigashirsha":9,"Chitra":9,"Dhanishtha":9},
+            "Punarvasu": {"Punarvasu":1,"Vishakha":1,"Purva Bhadrapada":1,"Pushya":2,"Anuradha":2,"Uttara Bhadrapada":2,"Ashlesha":3,"Jyeshtha":3,"Revati":3,"Ashwini":4,"Magha":4,"Mula":4,"Bharani":5,"Purva Phalguni":5,"Purva Ashadha":5,"Krittika":6,"Uttara Phalguni":6,"Uttara Ashadha":6,"Rohini":7,"Hasta":7,"Shravana":7,"Mrigashirsha":8,"Chitra":8,"Dhanishtha":8,"Ardra":9,"Swati":9,"Shatabhisha":9},
+            "Pushya": {"Pushya":1,"Anuradha":1,"Uttara Bhadrapada":1,"Ashlesha":2,"Jyeshtha":2,"Revati":2,"Ashwini":3,"Magha":3,"Mula":3,"Bharani":4,"Purva Phalguni":4,"Purva Ashadha":4,"Krittika":5,"Uttara Phalguni":5,"Uttara Ashadha":5,"Rohini":6,"Hasta":6,"Shravana":6,"Mrigashirsha":7,"Chitra":7,"Dhanishtha":7,"Ardra":8,"Swati":8,"Shatabhisha":8,"Punarvasu":9,"Vishakha":9,"Purva Bhadrapada":9},
+            "Ashlesha": {"Ashlesha":1,"Jyeshtha":1,"Revati":1,"Ashwini":2,"Magha":2,"Mula":2,"Bharani":3,"Purva Phalguni":3,"Purva Ashadha":3,"Krittika":4,"Uttara Phalguni":4,"Uttara Ashadha":4,"Rohini":5,"Hasta":5,"Shravana":5,"Mrigashirsha":6,"Chitra":6,"Dhanishtha":6,"Ardra":7,"Swati":7,"Shatabhisha":7,"Punarvasu":8,"Vishakha":8,"Purva Bhadrapada":8,"Pushya":9,"Anuradha":9,"Uttara Bhadrapada":9},
+            "Magha": {"Magha":1,"Mula":1,"Ashwini":1,"Purva Phalguni":2,"Purva Ashadha":2,"Bharani":2,"Uttara Phalguni":3,"Uttara Ashadha":3,"Krittika":3,"Hasta":4,"Shravana":4,"Rohini":4,"Chitra":5,"Dhanishtha":5,"Mrigashirsha":5,"Swati":6,"Shatabhisha":6,"Ardra":6,"Vishakha":7,"Purva Bhadrapada":7,"Punarvasu":7,"Anuradha":8,"Uttara Bhadrapada":8,"Pushya":8,"Jyeshtha":9,"Revati":9,"Ashlesha":9},
+            "Purva Phalguni": {"Purva Phalguni":1,"Purva Ashadha":1,"Bharani":1,"Uttara Phalguni":2,"Uttara Ashadha":2,"Krittika":2,"Hasta":3,"Shravana":3,"Rohini":3,"Chitra":4,"Dhanishtha":4,"Mrigashirsha":4,"Swati":5,"Shatabhisha":5,"Ardra":5,"Vishakha":6,"Purva Bhadrapada":6,"Punarvasu":6,"Anuradha":7,"Uttara Bhadrapada":7,"Pushya":7,"Jyeshtha":8,"Revati":8,"Ashlesha":8,"Mula":9,"Ashwini":9,"Magha":9},
+            "Uttara Phalguni": {"Uttara Phalguni":1,"Uttara Ashadha":1,"Krittika":1,"Hasta":2,"Shravana":2,"Rohini":2,"Chitra":3,"Dhanishtha":3,"Mrigashirsha":3,"Swati":4,"Shatabhisha":4,"Ardra":4,"Vishakha":5,"Purva Bhadrapada":5,"Punarvasu":5,"Anuradha":6,"Uttara Bhadrapada":6,"Pushya":6,"Jyeshtha":7,"Revati":7,"Ashlesha":7,"Mula":8,"Ashwini":8,"Magha":8,"Purva Phalguni":9,"Purva Ashadha":9,"Bharani":9},
+            "Hasta": {"Hasta":1,"Shravana":1,"Rohini":1,"Chitra":2,"Dhanishtha":2,"Mrigashirsha":2,"Swati":3,"Shatabhisha":3,"Ardra":3,"Vishakha":4,"Purva Bhadrapada":4,"Punarvasu":4,"Anuradha":5,"Uttara Bhadrapada":5,"Pushya":5,"Jyeshtha":6,"Revati":6,"Ashlesha":6,"Mula":7,"Ashwini":7,"Magha":7,"Purva Phalguni":8,"Purva Ashadha":8,"Bharani":8,"Uttara Phalguni":9,"Uttara Ashadha":9,"Krittika":9},
+            "Chitra": {"Chitra":1,"Dhanishtha":1,"Mrigashirsha":1,"Swati":2,"Shatabhisha":2,"Ardra":2,"Vishakha":3,"Purva Bhadrapada":3,"Punarvasu":3,"Anuradha":4,"Uttara Bhadrapada":4,"Pushya":4,"Jyeshtha":5,"Revati":5,"Ashlesha":5,"Mula":6,"Ashwini":6,"Magha":6,"Purva Phalguni":7,"Purva Ashadha":7,"Bharani":7,"Uttara Phalguni":8,"Uttara Ashadha":8,"Krittika":8,"Hasta":9,"Shravana":9,"Rohini":9},
+            "Swati": {"Swati":1,"Shatabhisha":1,"Ardra":1,"Vishakha":2,"Purva Bhadrapada":2,"Punarvasu":2,"Anuradha":3,"Uttara Bhadrapada":3,"Pushya":3,"Jyeshtha":4,"Revati":4,"Ashlesha":4,"Mula":5,"Ashwini":5,"Magha":5,"Purva Phalguni":6,"Purva Ashadha":6,"Bharani":6,"Uttara Phalguni":7,"Uttara Ashadha":7,"Krittika":7,"Hasta":8,"Shravana":8,"Rohini":8,"Chitra":9,"Dhanishtha":9,"Mrigashirsha":9},
+            "Vishakha": {"Vishakha":1,"Purva Bhadrapada":1,"Punarvasu":1,"Anuradha":2,"Uttara Bhadrapada":2,"Pushya":2,"Jyeshtha":3,"Revati":3,"Ashlesha":3,"Mula":4,"Ashwini":4,"Magha":4,"Purva Phalguni":5,"Purva Ashadha":5,"Bharani":5,"Uttara Phalguni":6,"Uttara Ashadha":6,"Krittika":6,"Hasta":7,"Shravana":7,"Rohini":7,"Chitra":8,"Dhanishtha":8,"Mrigashirsha":8,"Swati":9,"Shatabhisha":9,"Ardra":9},
+            "Anuradha": {"Anuradha":1,"Uttara Bhadrapada":1,"Pushya":1,"Jyeshtha":2,"Revati":2,"Ashlesha":2,"Mula":3,"Ashwini":3,"Magha":3,"Purva Phalguni":4,"Purva Ashadha":4,"Bharani":4,"Uttara Phalguni":5,"Uttara Ashadha":5,"Krittika":5,"Hasta":6,"Shravana":6,"Rohini":6,"Chitra":7,"Dhanishtha":7,"Mrigashirsha":7,"Swati":8,"Shatabhisha":8,"Ardra":8,"Vishakha":9,"Purva Bhadrapada":9,"Punarvasu":9},
+            "Jyeshtha": {"Jyeshtha":1,"Revati":1,"Ashlesha":1,"Mula":2,"Ashwini":2,"Magha":2,"Purva Phalguni":3,"Purva Ashadha":3,"Bharani":3,"Uttara Phalguni":4,"Uttara Ashadha":4,"Krittika":4,"Hasta":5,"Shravana":5,"Rohini":5,"Chitra":6,"Dhanishtha":6,"Mrigashirsha":6,"Swati":7,"Shatabhisha":7,"Ardra":7,"Vishakha":8,"Purva Bhadrapada":8,"Punarvasu":8,"Anuradha":9,"Uttara Bhadrapada":9,"Pushya":9},
+            "Mula": {"Mula":1,"Ashwini":1,"Magha":1,"Purva Ashadha":2,"Bharani":2,"Purva Phalguni":2,"Uttara Ashadha":3,"Krittika":3,"Uttara Phalguni":3,"Shravana":4,"Rohini":4,"Hasta":4,"Dhanishtha":5,"Mrigashirsha":5,"Chitra":5,"Shatabhisha":6,"Ardra":6,"Swati":6,"Purva Bhadrapada":7,"Punarvasu":7,"Vishakha":7,"Uttara Bhadrapada":8,"Pushya":8,"Anuradha":8,"Revati":9,"Ashlesha":9,"Jyeshtha":9},
+            "Purva Ashadha": {"Purva Ashadha":1,"Bharani":1,"Purva Phalguni":1,"Uttara Ashadha":2,"Krittika":2,"Uttara Phalguni":2,"Shravana":3,"Rohini":3,"Hasta":3,"Dhanishtha":4,"Mrigashirsha":4,"Chitra":4,"Shatabhisha":5,"Ardra":5,"Swati":5,"Purva Bhadrapada":6,"Punarvasu":6,"Vishakha":6,"Uttara Bhadrapada":7,"Pushya":7,"Anuradha":7,"Revati":8,"Ashlesha":8,"Jyeshtha":8,"Ashwini":9,"Magha":9,"Mula":9},
+            "Uttara Ashadha": {"Uttara Ashadha":1,"Krittika":1,"Uttara Phalguni":1,"Shravana":2,"Rohini":2,"Hasta":2,"Dhanishtha":3,"Mrigashirsha":3,"Chitra":3,"Shatabhisha":4,"Ardra":4,"Swati":4,"Purva Bhadrapada":5,"Punarvasu":5,"Vishakha":5,"Uttara Bhadrapada":6,"Pushya":6,"Anuradha":6,"Revati":7,"Ashlesha":7,"Jyeshtha":7,"Ashwini":8,"Magha":8,"Mula":8,"Bharani":9,"Purva Phalguni":9,"Purva Ashadha":9},
+            "Shravana": {"Shravana":1,"Rohini":1,"Hasta":1,"Dhanishtha":2,"Mrigashirsha":2,"Chitra":2,"Shatabhisha":3,"Ardra":3,"Swati":3,"Purva Bhadrapada":4,"Punarvasu":4,"Vishakha":4,"Uttara Bhadrapada":5,"Pushya":5,"Anuradha":5,"Revati":6,"Ashlesha":6,"Jyeshtha":6,"Ashwini":7,"Magha":7,"Mula":7,"Bharani":8,"Purva Phalguni":8,"Purva Ashadha":8,"Krittika":9,"Uttara Phalguni":9,"Uttara Ashadha":9},
+            "Dhanishtha": {"Dhanishtha":1,"Mrigashirsha":1,"Chitra":1,"Shatabhisha":2,"Ardra":2,"Swati":2,"Purva Bhadrapada":3,"Punarvasu":3,"Vishakha":3,"Uttara Bhadrapada":4,"Pushya":4,"Anuradha":4,"Revati":5,"Ashlesha":5,"Jyeshtha":5,"Ashwini":6,"Magha":6,"Mula":6,"Bharani":7,"Purva Phalguni":7,"Purva Ashadha":7,"Krittika":8,"Uttara Phalguni":8,"Uttara Ashadha":8,"Rohini":9,"Hasta":9,"Shravana":9},
+            "Shatabhisha": {"Shatabhisha":1,"Ardra":1,"Swati":1,"Purva Bhadrapada":2,"Punarvasu":2,"Vishakha":2,"Uttara Bhadrapada":3,"Pushya":3,"Anuradha":3,"Revati":4,"Ashlesha":4,"Jyeshtha":4,"Ashwini":5,"Magha":5,"Mula":5,"Bharani":6,"Purva Phalguni":6,"Purva Ashadha":6,"Krittika":7,"Uttara Phalguni":7,"Uttara Ashadha":7,"Rohini":8,"Hasta":8,"Shravana":8,"Mrigashirsha":9,"Chitra":9,"Dhanishtha":9},
+            "Purva Bhadrapada": {"Purva Bhadrapada":1,"Punarvasu":1,"Vishakha":1,"Uttara Bhadrapada":2,"Pushya":2,"Anuradha":2,"Revati":3,"Ashlesha":3,"Jyeshtha":3,"Ashwini":4,"Magha":4,"Mula":4,"Bharani":5,"Purva Phalguni":5,"Purva Ashadha":5,"Krittika":6,"Uttara Phalguni":6,"Uttara Ashadha":6,"Rohini":7,"Hasta":7,"Shravana":7,"Mrigashirsha":8,"Chitra":8,"Dhanishtha":8,"Ardra":9,"Swati":9,"Shatabhisha":9},
+            "Uttara Bhadrapada": {"Uttara Bhadrapada":1,"Pushya":1,"Anuradha":1,"Revati":2,"Ashlesha":2,"Jyeshtha":2,"Ashwini":3,"Magha":3,"Mula":3,"Bharani":4,"Purva Phalguni":4,"Purva Ashadha":4,"Krittika":5,"Uttara Phalguni":5,"Uttara Ashadha":5,"Rohini":6,"Hasta":6,"Shravana":6,"Mrigashirsha":7,"Chitra":7,"Dhanishtha":7,"Ardra":8,"Swati":8,"Shatabhisha":8,"Punarvasu":9,"Vishakha":9,"Purva Bhadrapada":9},
+            "Revati": {"Revati":1,"Ashlesha":1,"Jyeshtha":1,"Ashwini":2,"Magha":2,"Mula":2,"Bharani":3,"Purva Phalguni":3,"Purva Ashadha":3,"Krittika":4,"Uttara Phalguni":4,"Uttara Ashadha":4,"Rohini":5,"Hasta":5,"Shravana":5,"Mrigashirsha":6,"Chitra":6,"Dhanishtha":6,"Ardra":7,"Swati":7,"Shatabhisha":7,"Punarvasu":8,"Vishakha":8,"Purva Bhadrapada":8,"Pushya":9,"Anuradha":9,"Uttara Bhadrapada":9},
+        };
 
-        function calculatePeriodDetails(nakshatraName, moonSignShortName, birthNakshatraIndex, birthRashiIndex, item) {
-            const transitNakshatraIndex = nakshatras.indexOf(nakshatraName);
-            let nakshatraCount = transitNakshatraIndex - birthNakshatraIndex;
-            if (nakshatraCount < 0) nakshatraCount += 27;
-            const taraBalaGroup = ((nakshatraCount) % 9) + 1;
-            const isNakshatraGood = goodTaraBalaGroups.includes(taraBalaGroup) && transitNakshatraIndex !== -1;
+        function calculatePeriodDetails(nakshatraName, moonSignShortName, birthNakshatra, birthRashiIndex, panchangItem) {
+            // --- FIX: Use PDF-based lookup for Tara Bala ---
+            const taraBalaGroup = taraBalaData[birthNakshatra]?.[nakshatraName];
+            const isNakshatraGood = goodTaraBalaGroups.includes(taraBalaGroup);
 
             const transitMoonSign = rashiMapping[moonSignShortName] || moonSignShortName;
             const transitRashiIndex = rashis.indexOf(transitMoonSign);
             let rashiCount = transitRashiIndex - birthRashiIndex;
             if (rashiCount < 0) rashiCount += 12;
-            rashiCount = (rashiCount % 12) + 1;
+            rashiCount = rashiCount + 1;
             const isRashiGood = !badRashiCounts.includes(rashiCount) && transitRashiIndex !== -1;
 
             const isOverallGood = isNakshatraGood && isRashiGood;
 
-            const tithiName = (item.tithi || '').split(' upto ')[0].trim();
+            const tithiName = (panchangItem.tithi || '').split(' upto ')[0].trim();
             const tithiScore = tithiScores[tithiName] || 0;
             const nakshatraScore = nakshatraScores[nakshatraName] || 0;
-            const dayName = item.weekday;
+            const dayName = panchangItem.weekday;
             const dayScore = dayScores[dayName] || 0;
-            const karanaName = (item.karana || '').split(' upto ')[0].trim();
+            const karanaName = (panchangItem.karana || '').split(' upto ')[0].trim();
             const karanaScore = karanaScores[karanaName] || 0;
-            const yogaName = (item.yoga || '').split(' upto ')[0].trim();
+            const yogaName = (panchangItem.yoga || '').split(' upto ')[0].trim();
             const yogaScore = yogaScores[yogaName] || 0;
             const panchangScore = tithiScore + nakshatraScore + dayScore + karanaScore + yogaScore;
 
@@ -682,19 +713,18 @@
             return { text: verdictText, class: verdictClass };
         }
 
-        // MODIFIED function to include Tara Bala significance
         function generateChandraTaraBalHtml(results) {
-            // Verdict
+            if (!results.taraBalaGroup) { // Handle case where nakshatra isn't in our data
+                return `<div class="font-bold text-red-700 mb-1">Data Error</div><div class="text-xs text-red-700">Could not calculate Tara Bala.</div>`;
+            }
             const verdictText = results.isOverallGood ? 'Auspicious' : 'Inauspicious';
             const verdictClass = results.isOverallGood ? 'text-green-700' : 'text-red-700';
             const verdictHtml = `<div class="font-bold ${verdictClass} mb-1">${verdictText}</div>`;
 
-            // Tara Bala Details
             const taraInfo = taraBalaDescriptions[results.taraBalaGroup];
             const taraClass = results.isNakshatraGood ? 'text-green-700' : 'text-red-700';
             const taraHtml = `<div class="text-xs ${taraClass}"><strong class="text-gray-800">Tara Bala:</strong> ${taraInfo.type} - <span class="text-gray-600 italic">${taraInfo.significance}</span></div>`;
 
-            // Chandra Bala Details
             const chandraClass = results.isRashiGood ? 'text-green-700' : 'text-red-700';
             const chandraStatusText = results.isRashiGood ? 'Good' : `Bad (${results.rashiCount}th Moon)`;
             const chandraHtml = `<div class="text-xs ${chandraClass} mt-1"><strong class="text-gray-800">Chandra Bala:</strong> ${chandraStatusText}</div>`;
@@ -702,14 +732,23 @@
             return verdictHtml + taraHtml + chandraHtml;
         }
 
+        // FIX: Helper to format time labels
+        function formatPeriodTime(period, totalPeriods) {
+            const startTimeText = period.startTime === 'Start of Day' ? 'from Start of Day' : `from ${period.startTime}`;
+            const endTimeText = period.endTime === 'End of Day' ? '' : ` upto ${period.endTime}`;
+            
+            if (totalPeriods === 1) {
+                return ''; // Full day, no time needed
+            }
+
+            return `${startTimeText}${endTimeText}`;
+        }
 
         function renderPanchangTable(panchangList, birthNakshatra, birthMoonSign, showPanchang, showCT, showChoghadiya) {
             if (!panchangList || panchangList.length === 0) {
                 panchangDataContainer.innerHTML = `<p class="text-center text-gray-500 py-8">No Panchang data found.</p>`;
                 return;
             }
-
-            const birthNakshatraIndex = nakshatras.indexOf(birthNakshatra);
             const birthRashiIndex = rashis.indexOf(birthMoonSign);
 
             const headers = ['<th style="width: 10%;">Date</th>'];
@@ -729,86 +768,76 @@
                     return `<tr class="bg-red-50 text-red-700"><td colspan="${columnCount}" class="px-4 py-2 text-center font-semibold">${new Date(item.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}: ${item.error}</td></tr>`;
                 }
                 
-                // --- Reverted Transit Logic ---
-                const transitThresholdHour = 16;
-                let p2_results = null, transitTime = null, transitType = null;
+                // --- FIX: MULTI-TRANSIT LOGIC ---
+                const changePoints = [];
                 const nakshatraParts = (item.nakshatra || '').split(' upto ');
-                const p1_nakshatra = nakshatraParts[0].trim();
-                let p2_nakshatra = p1_nakshatra;
-                const moonsignParts = (item.moonsign || '').split(' upto ');
-                const p1_moonsign = moonsignParts[0].trim();
-                let p2_moonsign = p1_moonsign;
-
                 if (nakshatraParts.length > 1 && !nakshatraParts[1].includes(',')) {
                     const timeStr = nakshatraParts[1].trim();
-                    if (parseTimeToHour(timeStr) < transitThresholdHour) {
-                        transitTime = timeStr; transitType = 'Nakshatra';
-                        const currentIndex = nakshatras.indexOf(p1_nakshatra);
-                        if (currentIndex !== -1) p2_nakshatra = nakshatras[(currentIndex + 1) % 27];
-                    }
+                    const timeMins = timeToMinutes(timeStr);
+                    if (timeMins !== Infinity) { changePoints.push({ time: timeStr, minutes: timeMins, type: 'Nakshatra' }); }
                 }
-                if (!transitTime && moonsignParts.length > 1 && !moonsignParts[1].includes(',')) {
-                     const timeStr = moonsignParts[1].trim();
-                     if (parseTimeToHour(timeStr) < transitThresholdHour) {
-                         transitTime = timeStr; transitType = 'Moonsign';
-                         const currentRashiStd = rashiMapping[p1_moonsign] || p1_moonsign;
-                         const currentIndex = rashis.indexOf(currentRashiStd);
+                const moonsignParts = (item.moonsign || '').split(' upto ');
+                if (moonsignParts.length > 1 && !moonsignParts[1].includes(',')) {
+                    const timeStr = moonsignParts[1].trim();
+                    const timeMins = timeToMinutes(timeStr);
+                    if (timeMins !== Infinity) { changePoints.push({ time: timeStr, minutes: timeMins, type: 'Moonsign' }); }
+                }
+
+                changePoints.sort((a, b) => a.minutes - b.minutes);
+                const periods = [];
+                let lastNakshatra = nakshatraParts[0].trim();
+                let lastMoonsign = moonsignParts[0].trim();
+                
+                periods.push({
+                    startTime: 'Start of Day',
+                    endTime: changePoints.length > 0 ? changePoints[0].time : 'End of Day',
+                    nakshatra: lastNakshatra,
+                    moonsign: lastMoonsign
+                });
+                
+                changePoints.forEach((point, index) => {
+                    if (point.type === 'Nakshatra') {
+                        const currentIndex = nakshatras.indexOf(lastNakshatra);
+                        lastNakshatra = currentIndex !== -1 ? nakshatras[(currentIndex + 1) % 27] : 'Unknown';
+                    }
+                    if (point.type === 'Moonsign') {
+                        const currentRashiStd = rashiMapping[lastMoonsign] || lastMoonsign;
+                        const currentIndex = rashis.indexOf(currentRashiStd);
                          if (currentIndex !== -1) {
                             const nextRashiFullName = rashis[(currentIndex + 1) % 12];
-                            p2_moonsign = Object.keys(rashiMapping).find(key => rashiMapping[key] === nextRashiFullName) || nextRashiFullName;
-                         }
-                     }
-                }
-                const p1_results = calculatePeriodDetails(p1_nakshatra, p1_moonsign, birthNakshatraIndex, birthRashiIndex, item);
-                if (transitTime) {
-                    p2_results = calculatePeriodDetails(p2_nakshatra, p2_moonsign, birthNakshatraIndex, birthRashiIndex, item);
-                }
-                
-                // --- Moonsign Display Logic ---
-                let moonsignHtml;
-                let moonsignTransitTime = null;
-                if (moonsignParts.length > 1) {
-                    const timeStr = moonsignParts[1].split(',')[0].trim();
-                    if (parseTimeToHour(timeStr) < 16) {
-                        moonsignTransitTime = timeStr;
+                            lastMoonsign = Object.keys(rashiMapping).find(key => rashiMapping[key] === nextRashiFullName) || nextRashiFullName;
+                         } else { lastMoonsign = 'Unknown'; }
                     }
-                }
+                    periods.push({
+                        startTime: point.time,
+                        endTime: (index < changePoints.length - 1) ? changePoints[index + 1].time : 'End of Day',
+                        nakshatra: lastNakshatra,
+                        moonsign: lastMoonsign
+                    });
+                });
 
-                if (moonsignTransitTime) {
-                    const p1_moonsign_short = moonsignParts[0].trim();
-                    const p1_moonsign_full = rashiMapping[p1_moonsign_short] || p1_moonsign_short;
-                    const p1_index = rashis.indexOf(p1_moonsign_full);
-                    const p2_moonsign_full = p1_index !== -1 ? rashis[(p1_index + 1) % 12] : "Unknown";
-                    moonsignHtml = `<div><span>${p1_moonsign_full}</span><span class="text-xs text-gray-500"> upto ${moonsignTransitTime}</span></div><div class="mt-1"><span class="text-blue-600">${p2_moonsign_full}</span><span class="text-xs text-gray-500"> after ${moonsignTransitTime}</span></div>`;
-                } else {
-                    const timeInfo = moonsignParts.length > 1 ? ` <span class="text-xs text-gray-500">upto ${moonsignParts[1].split(',')[0].trim()}</span>` : '';
-                    moonsignHtml = `<span>${rashiMapping[p1_moonsign] || p1_moonsign}</span>${timeInfo}`;
-                }
+                const periodResults = periods.map(p => ({
+                    ...p,
+                    results: calculatePeriodDetails(p.nakshatra, p.moonsign, birthNakshatra, birthRashiIndex, item)
+                }));
+                
+                const generateContent = (getter) => periodResults.map(p => getter(p)).join('<hr class="my-1 border-gray-300">');
+                
+                // --- FIX: Use new time formatting in display ---
+                const totalPeriods = periodResults.length;
+                const nakshatraHtml = generateContent(p => `<div><span>${p.nakshatra}</span><br><span class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</span></div>`);
+                const moonsignHtml = generateContent(p => `<div><span>${p.results.moonSignName}</span><br><span class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</span></div>`);
+                const panchangScoreContent = generateContent(p => `<div><div class="font-bold text-lg ${p.results.scoreCategoryClass}">${p.results.panchangScore}</div><div class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</div></div>`);
+                const chandraTaraBalContent = generateContent(p => `<div>${generateChandraTaraBalHtml(p.results)}<div class="text-xs text-gray-500 pt-1">${formatPeriodTime(p, totalPeriods)}</div></div>`);
+                const finalVerdictContent = generateContent(p => {
+                    const verdict = calculateFinalVerdict(p.results.panchangScore, p.results.isOverallGood);
+                    return `<div><span class="font-bold ${verdict.class}">${verdict.text}</span><div class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</div></div>`;
+                });
 
-
-                // --- Nakshatra Display Logic (from original file) ---
-                let nakshatraHtml;
-                if (p2_results && p1_results.nakshatraName !== p2_results.nakshatraName) {
-                    nakshatraHtml = `<div><span>${p1_results.nakshatraName}</span><span class="text-xs text-gray-500"> upto ${transitTime}</span></div><div class="mt-1"><span class="text-blue-600">${p2_results.nakshatraName}</span><span class="text-xs text-gray-500"> after ${transitTime}</span></div>`;
-                } else {
-                    nakshatraHtml = `<span>${p1_results.nakshatraName}</span>` + (nakshatraParts.length > 1 ? ` <span class="text-xs text-gray-500">upto ${nakshatraParts[1].trim()}</span>` : '');
-                }
-
-                const scoreSup = (score) => `<sup class="${score > 0 ? 'score-green' : 'score-red'}">${score}</sup>`;
                 const dateDisplay = `<span class="${item.paksha === 'Shukla Paksha' ? 'text-orange-600 font-bold' : ''}">${item.date}</span><br><span class="font-normal text-gray-600">${item.weekday}</span>`;
-                let panchangScoreContent = p2_results ? `<div><div class="font-bold text-lg ${p1_results.scoreCategoryClass}">${p1_results.panchangScore}</div><div class="text-xs text-gray-500">until ${transitTime}</div></div><hr class="my-1 border-gray-300"><div><div class="font-bold text-lg ${p2_results.scoreCategoryClass}">${p2_results.panchangScore}</div><div class="text-xs text-gray-500">after ${transitTime}</div></div>` : `<div><div class="font-bold text-lg ${p1_results.scoreCategoryClass}">${p1_results.panchangScore}</div><div class="text-xs ${p1_results.scoreCategoryClass}" style="white-space: normal;">${p1_results.scoreCategory}</div></div>`;
-                
-                let chandraTaraBalContent = p2_results 
-                    ? `<div>${generateChandraTaraBalHtml(p1_results)}<div class="text-xs text-gray-500 pt-1">Until ${transitTime}</div></div><hr class="my-1 border-gray-300"><div>${generateChandraTaraBalHtml(p2_results)}<div class="text-xs text-gray-500 pt-1">After ${transitTime}</div></div>` 
-                    : generateChandraTaraBalHtml(p1_results);
-
-                
                 let mainRowCells = [`<td>${dateDisplay}</td>`];
-                if (showPanchang && showCT) {
-                    const p1_finalVerdict = calculateFinalVerdict(p1_results.panchangScore, p1_results.isOverallGood);
-                    const p2_finalVerdict = p2_results ? calculateFinalVerdict(p2_results.panchangScore, p2_results.isOverallGood) : null;
-                    let finalVerdictContentHtml = p2_finalVerdict ? `<div><span class="font-bold ${p1_finalVerdict.class}">${p1_finalVerdict.text}</span><div class="text-xs text-gray-500">until ${transitTime}</div></div><hr class="my-1 border-gray-300"><div><span class="font-bold ${p2_finalVerdict.class}">${p2_finalVerdict.text}</span><div class="text-xs text-gray-500">after ${transitTime}</div></div>` : `<div><span class="font-bold ${p1_finalVerdict.class}">${p1_finalVerdict.text}</span></div>`;
-                    mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${moonsignHtml}</td>`, `<td class="text-center">${panchangScoreContent}</td>`, `<td>${chandraTaraBalContent}</td>`, `<td class="text-center">${finalVerdictContentHtml}</td>`);
+                 if (showPanchang && showCT) {
+                    mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${moonsignHtml}</td>`, `<td class="text-center">${panchangScoreContent}</td>`, `<td>${chandraTaraBalContent}</td>`, `<td class="text-center">${finalVerdictContent}</td>`);
                 } else if (showPanchang) {
                     mainRowCells.push(`<td>${nakshatraHtml}</td>`, `<td>${(item.tithi || '').split(' upto ')[0]}</td>`, `<td>${(item.yoga || '').split(' upto ')[0]}</td>`, `<td>${(item.karana || '').split(' upto ')[0]}</td>`, `<td class="text-center">${panchangScoreContent}</td>`);
                 } else { // CT Only
@@ -816,43 +845,42 @@
                 }
                 mainRowCells.push(`<td class="text-center"><button class="expand-btn text-gray-600 hover:text-gray-900 focus:outline-none" data-date="${item.date}"><span class="expand-arrow">&#9658;</span></button></td>`);
 
+                const scoreSup = (score) => `<sup class="${score > 0 ? 'score-green' : 'score-red'}">${score}</sup>`;
+                const firstPeriodResult = periodResults[0].results;
                 const dailyParamsTable = `<table class="detail-table"><tbody>
                     <tr><td class="font-semibold">Paksha</td><td>${item.paksha}</td></tr>
-                    <tr><td class="font-semibold">Day</td><td>${item.weekday}${scoreSup(p1_results.dayScore)}</td></tr>
-                    <tr><td class="font-semibold">Tithi</td><td>${formatCellWithTime(item.tithi, p1_results.tithiScore)}</td></tr>
-                    <tr><td class="font-semibold">Yoga</td><td>${formatCellWithTime(item.yoga, p1_results.yogaScore)}</td></tr>
-                    <tr><td class="font-semibold">Karana</td><td>${formatCellWithTime(item.karana, p1_results.karanaScore)}</td></tr>
+                    <tr><td class="font-semibold">Day</td><td>${item.weekday}${scoreSup(firstPeriodResult.dayScore)}</td></tr>
+                    <tr><td class="font-semibold">Tithi</td><td>${formatCellWithTime(item.tithi, firstPeriodResult.tithiScore)}</td></tr>
+                    <tr><td class="font-semibold">Yoga</td><td>${formatCellWithTime(item.yoga, firstPeriodResult.yogaScore)}</td></tr>
+                    <tr><td class="font-semibold">Karana</td><td>${formatCellWithTime(item.karana, firstPeriodResult.karanaScore)}</td></tr>
                 </tbody></table>`;
-                const analysisTable = (isSplit) => {
-                    let rows = [];
-                    if (showPanchang) rows.push(`<tr><td>Panchang Score</td><td>${p1_results.panchangScore}</td>${isSplit ? `<td>${p2_results.panchangScore}</td>` : ''}</tr>`);
-                    if (showCT) {
-                        rows.push(`<tr><td>Nakshatra</td><td>${p1_results.nakshatraName} ${showPanchang ? scoreSup(p1_results.nakshatraScore) : ''}</td>${isSplit ? `<td>${p2_results.nakshatraName} ${showPanchang ? scoreSup(p2_results.nakshatraScore) : ''}</td>` : ''}</tr>`);
-                        rows.push(`<tr><td>Moonsign</td><td>${p1_results.moonSignName}</td>${isSplit ? `<td>${p2_results.moonSignName}</td>` : ''}</tr>`);
-                        rows.push(`<tr><td class="font-semibold">CT Verdict & Details</td><td>${generateChandraTaraBalHtml(p1_results)}</td>${isSplit ? `<td>${generateChandraTaraBalHtml(p2_results)}</td>` : ''}</tr>`);
-                    }
-                    const header = isSplit ? `<tr><th>Analysis</th><th>Period 1 (until ${transitTime})</th><th>Period 2 (after ${transitTime})</th></tr>` : `<thead><tr><th>Analysis</th><th>Full Day</th></tr></thead>`;
-                    return `<table class="detail-table mt-4"><thead>${header}</thead><tbody>${rows.join('')}</tbody></table>`;
-                };
 
+                const analysisHeaders = periodResults.map(p => `<th>Period (${formatPeriodTime(p, totalPeriods)})</th>`).join('');
+                const analysisRows = (title, rowGenerator) => `<tr><td class="font-semibold">${title}</td>${periodResults.map(p => `<td>${rowGenerator(p)}</td>`).join('')}</tr>`;
+                
+                let analysisTableRows = [];
+                if (showPanchang) analysisTableRows.push(analysisRows('Panchang Score', p => p.results.panchangScore));
+                if (showCT) {
+                    analysisTableRows.push(analysisRows('Nakshatra', p => `${p.results.nakshatraName} ${showPanchang ? scoreSup(p.results.nakshatraScore) : ''}`));
+                    analysisTableRows.push(analysisRows('Moonsign', p => p.results.moonSignName));
+                    analysisTableRows.push(analysisRows('CT Verdict & Details', p => generateChandraTaraBalHtml(p.results)));
+                }
+                const analysisTable = `<table class="detail-table mt-4"><thead><tr><th>Analysis</th>${analysisHeaders}</tr></thead><tbody>${analysisTableRows.join('')}</tbody></table>`;
+                
                 let detailContentHtml = [];
                 let detailSection1 = '';
                  if (showPanchang) {
-                    detailSection1 += `<h3>Daily Parameters & Analysis</h3>${dailyParamsTable}${analysisTable(!!p2_results)}`;
+                    detailSection1 += `<h3>Daily Parameters & Analysis</h3>${dailyParamsTable}${analysisTable}`;
                 } else if (showCT) {
-                    detailSection1 += `<h3>Chandrabal & Tarabal Analysis</h3>${analysisTable(!!p2_results)}`;
+                    detailSection1 += `<h3>Chandrabal & Tarabal Analysis</h3>${analysisTable}`;
                 }
                 if (detailSection1) {
                      detailContentHtml.push(`<div class="detail-section" style="flex: 2; min-width: 320px;">${detailSection1}</div>`);
                 }
                 
-                const generalDetailsContent = `<div class="detail-section" style="flex: 1; min-width: 220px;"><h3>General Timings</h3>${['sunrise', 'sunset', 'rahu_kalam', 'abhijit_muhurta', 'brahma_muhurta', 'amrit_kalam'].map(col => `<p class="flex justify-between ${col === 'rahu_kalam' ? 'text-red-700 font-semibold' : (col === 'abhijit_muhurta' ? 'text-green-700 font-semibold' : '')}"><strong>${col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> <span>${Array.isArray(item[col]) ? item[col].join('<br>') : (item[col] || 'N/A')}</span></p>`).join('')}</div>`;
+                const choghadiyaButtonHtml = showChoghadiya ? `<div class="text-center mt-4"><button class="btn-choghadiya-view show-choghadiya-btn" data-date="${item.date}">Show Favorable Choghadiya</button></div>` : '';
+                const generalDetailsContent = `<div class="detail-section" style="flex: 1; min-width: 220px;"><h3>General Timings</h3>${['sunrise', 'sunset', 'rahu_kalam', 'abhijit_muhurta', 'brahma_muhurta', 'amrit_kalam'].map(col => `<p class="flex justify-between ${col === 'rahu_kalam' ? 'text-red-700 font-semibold' : (col === 'abhijit_muhurta' ? 'text-green-700 font-semibold' : '')}"><strong>${col.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> <span>${Array.isArray(item[col]) ? item[col].join('<br>') : (item[col] || 'N/A')}</span></p>`).join('')}${choghadiyaButtonHtml}</div>`;
                 detailContentHtml.push(generalDetailsContent);
-                
-                if (showChoghadiya) {
-                    const choghadiyaButtonHtml = `<div class="detail-section" style="flex-basis: 100%; text-align: center;"><button class="btn-secondary show-choghadiya-btn" data-date="${item.date}">Show Auspicious Choghadiya</button></div>`;
-                    detailContentHtml.push(choghadiyaButtonHtml);
-                }
                 
                 return `<tr class="main-row">${mainRowCells.join('')}</tr>
                         <tr id="details-${item.date}" class="detail-row hidden"><td colspan="${columnCount}"><div class="detail-row-content">${detailContentHtml.join('')}</div></td></tr>`;
