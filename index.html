@@ -251,7 +251,6 @@
 
     <script>
         // --- DATA AND CONSTANTS ---
-        // FIX: Standardized Nakshatra names for consistency
         const nakshatras = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashirsha", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishtha", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"];
         const rashis = ["Mesh (Aries)", "Vrishabh (Taurus)", "Mithun (Gemini)", "Kark (Cancer)", "Singh (Leo)", "Kanya (Virgo)", "Tula (Libra)", "Vrishchik (Scorpio)", "Dhanu (Sagittarius)", "Makar (Capricorn)", "Kumbh (Aquarius)", "Meen (Pisces)"];
         const rashiMapping = { "Mesha": "Mesh (Aries)", "Mesh": "Mesh (Aries)", "Vrishabha": "Vrishabh (Taurus)", "Vrishabh": "Vrishabh (Taurus)", "Mithuna": "Mithun (Gemini)", "Mithun": "Mithun (Gemini)", "Karka": "Kark (Cancer)", "Kark": "Kark (Cancer)", "Simha": "Singh (Leo)", "Singh": "Singh (Leo)", "Kanya": "Kanya (Virgo)", "Tula": "Tula (Libra)", "Vrishchika": "Vrishchik (Scorpio)", "Vrishchik": "Vrishchik (Scorpio)", "Dhanu": "Dhanu (Sagittarius)", "Dhanus": "Dhanu (Sagittarius)", "Makar": "Makar (Capricorn)", "Makara": "Makar (Capricorn)", "Kumbha": "Kumbh (Aquarius)", "Kumbh": "Kumbh (Aquarius)", "Meena": "Meen (Pisces)", "Meen": "Meen (Pisces)" };
@@ -636,8 +635,6 @@
             return `${name}${score !== undefined ? `<sup class="${scoreClass}">${score}</sup>` : ''}${timeInfo}`;
         }
         
-        // --- FIX: TARA BALA DATA FROM PDF ---
-        // This data is manually transcribed from the provided PDF.
         const taraBalaData = {
             "Ashwini": {"Ashwini":1,"Magha":1,"Mula":1,"Bharani":2,"Purva Phalguni":2,"Purva Ashadha":2,"Krittika":3,"Uttara Phalguni":3,"Uttara Ashadha":3,"Rohini":4,"Hasta":4,"Shravana":4,"Mrigashirsha":5,"Chitra":5,"Dhanishtha":5,"Ardra":6,"Swati":6,"Shatabhisha":6,"Punarvasu":7,"Vishakha":7,"Purva Bhadrapada":7,"Pushya":8,"Anuradha":8,"Uttara Bhadrapada":8,"Ashlesha":9,"Jyeshtha":9,"Revati":9},
             "Bharani": {"Bharani":1,"Purva Phalguni":1,"Purva Ashadha":1,"Krittika":2,"Uttara Phalguni":2,"Uttara Ashadha":2,"Rohini":3,"Hasta":3,"Shravana":3,"Mrigashirsha":4,"Chitra":4,"Dhanishtha":4,"Ardra":5,"Swati":5,"Shatabhisha":5,"Punarvasu":6,"Vishakha":6,"Purva Bhadrapada":6,"Pushya":7,"Anuradha":7,"Uttara Bhadrapada":7,"Ashlesha":8,"Jyeshtha":8,"Revati":8,"Ashwini":9,"Magha":9,"Mula":9},
@@ -669,8 +666,15 @@
         };
 
         function calculatePeriodDetails(nakshatraName, moonSignShortName, birthNakshatra, birthRashiIndex, panchangItem) {
-            // --- FIX: Use PDF-based lookup for Tara Bala ---
-            const taraBalaGroup = taraBalaData[birthNakshatra]?.[nakshatraName];
+            // FIX: Standardize Nakshatra names to handle variations from scraping.
+            const nakshatraNameMapping = {
+                "Mrigashira": "Mrigashirsha",
+                "Aridra": "Ardra" 
+            };
+            const standardizedNakshatraName = nakshatraNameMapping[nakshatraName] || nakshatraName;
+
+            // Use the standardized name for all lookups.
+            const taraBalaGroup = taraBalaData[birthNakshatra]?.[standardizedNakshatraName];
             const isNakshatraGood = goodTaraBalaGroups.includes(taraBalaGroup);
 
             const transitMoonSign = rashiMapping[moonSignShortName] || moonSignShortName;
@@ -684,7 +688,8 @@
 
             const tithiName = (panchangItem.tithi || '').split(' upto ')[0].trim();
             const tithiScore = tithiScores[tithiName] || 0;
-            const nakshatraScore = nakshatraScores[nakshatraName] || 0;
+            // Use the standardized name for score calculation.
+            const nakshatraScore = nakshatraScores[standardizedNakshatraName] || 0;
             const dayName = panchangItem.weekday;
             const dayScore = dayScores[dayName] || 0;
             const karanaName = (panchangItem.karana || '').split(' upto ')[0].trim();
@@ -700,7 +705,8 @@
             else { scoreCategory = 'Not Recommended'; scoreCategoryClass = 'text-red-700'; }
             
             return {
-                nakshatraName, moonSignName: transitMoonSign,
+                nakshatraName: standardizedNakshatraName, // Return the corrected name for display
+                moonSignName: transitMoonSign,
                 panchangScore, tithiScore, nakshatraScore, dayScore, karanaScore, yogaScore,
                 scoreCategory, scoreCategoryClass,
                 isOverallGood, taraBalaGroup, isNakshatraGood, isRashiGood, rashiCount
@@ -732,7 +738,6 @@
             return verdictHtml + taraHtml + chandraHtml;
         }
 
-        // FIX: Helper to format time labels
         function formatPeriodTime(period, totalPeriods) {
             const startTimeText = period.startTime === 'Start of Day' ? 'from Start of Day' : `from ${period.startTime}`;
             const endTimeText = period.endTime === 'End of Day' ? '' : ` upto ${period.endTime}`;
@@ -768,7 +773,6 @@
                     return `<tr class="bg-red-50 text-red-700"><td colspan="${columnCount}" class="px-4 py-2 text-center font-semibold">${new Date(item.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}: ${item.error}</td></tr>`;
                 }
                 
-                // --- FIX: MULTI-TRANSIT LOGIC ---
                 const changePoints = [];
                 const nakshatraParts = (item.nakshatra || '').split(' upto ');
                 if (nakshatraParts.length > 1 && !nakshatraParts[1].includes(',')) {
@@ -784,8 +788,13 @@
                 }
 
                 changePoints.sort((a, b) => a.minutes - b.minutes);
+                
                 const periods = [];
+                const nakshatraNameMapping = { "Mrigashira": "Mrigashirsha", "Aridra": "Ardra" };
+                
                 let lastNakshatra = nakshatraParts[0].trim();
+                lastNakshatra = nakshatraNameMapping[lastNakshatra] || lastNakshatra;
+
                 let lastMoonsign = moonsignParts[0].trim();
                 
                 periods.push({
@@ -823,9 +832,8 @@
                 
                 const generateContent = (getter) => periodResults.map(p => getter(p)).join('<hr class="my-1 border-gray-300">');
                 
-                // --- FIX: Use new time formatting in display ---
                 const totalPeriods = periodResults.length;
-                const nakshatraHtml = generateContent(p => `<div><span>${p.nakshatra}</span><br><span class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</span></div>`);
+                const nakshatraHtml = generateContent(p => `<div><span>${p.results.nakshatraName}</span><br><span class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</span></div>`);
                 const moonsignHtml = generateContent(p => `<div><span>${p.results.moonSignName}</span><br><span class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</span></div>`);
                 const panchangScoreContent = generateContent(p => `<div><div class="font-bold text-lg ${p.results.scoreCategoryClass}">${p.results.panchangScore}</div><div class="text-xs text-gray-500">${formatPeriodTime(p, totalPeriods)}</div></div>`);
                 const chandraTaraBalContent = generateContent(p => `<div>${generateChandraTaraBalHtml(p.results)}<div class="text-xs text-gray-500 pt-1">${formatPeriodTime(p, totalPeriods)}</div></div>`);
